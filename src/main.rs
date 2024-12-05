@@ -226,7 +226,7 @@ async fn main() -> std::io::Result<()> {
                                     .build(),
                             )
                             .response(
-                                "CrawledResult",
+                                "200",
                                 utoipa::openapi::response::ResponseBuilder::new()
                                     .description("Crawled result")
                                     .content(
