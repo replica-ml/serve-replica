@@ -6,7 +6,8 @@ use utoipa_redoc::Servable;
 use utoipa_scalar::Servable as ScalarServable;
 
 use crate::extra_schemas::{
-    CrawledResult, ScraperPostBody, ScraperPostBodyResponse, EXAMPLE_SCRAPED_RESULT,
+    CrawledResult, ScraperPostBody, ScraperPostBodyResponse, SwapPostRequest, SwapPostResponse,
+    EXAMPLE_SCRAPED_RESULT,
 };
 
 mod extra_schemas;
@@ -172,9 +173,11 @@ async fn main() -> std::io::Result<()> {
                     ScraperPostBodyResponse::schema(),
                 );
                 actual_schemas.insert(String::from("CrawledResult"), CrawledResult::schema());
+                actual_schemas.insert(String::from("SwapPostRequest"), SwapPostRequest::schema());
+                actual_schemas.insert(String::from("SwapPostResponse"), SwapPostResponse::schema());
             }
             openapi.paths.paths.insert(
-                String::from("/api/v1/crawl"),
+                String::from("/v1/crawl"),
                 utoipa::openapi::path::PathItemBuilder::new()
                     .summary(Some(String::from("Web crawler")))
                     .operation(
@@ -186,7 +189,7 @@ async fn main() -> std::io::Result<()> {
                                     .description(Some(String::from("URL to crawl")))
                                     .content(
                                         mime::APPLICATION_JSON.to_string(),
-                                        utoipa::openapi::content::ContentBuilder::new()
+                                        utoipa::openapi::ContentBuilder::new()
                                             .schema(Some(utoipa::openapi::Ref::from_schema_name(
                                                 "ScraperPostBody",
                                             )))
@@ -204,7 +207,9 @@ async fn main() -> std::io::Result<()> {
                                     .content(
                                         mime::APPLICATION_JSON.to_string(),
                                         utoipa::openapi::ContentBuilder::new()
-                                            .schema(Some(ScraperPostBodyResponse::schema()))
+                                            .schema(Some(utoipa::openapi::Ref::from_schema_name(
+                                                "ScraperPostBodyResponse",
+                                            )))
                                             .build(),
                                     ),
                             ),
@@ -212,7 +217,7 @@ async fn main() -> std::io::Result<()> {
                     .build(),
             );
             openapi.paths.paths.insert(
-                String::from("/api/v1/crawl/{id}"),
+                String::from("/v1/crawl/{id}"),
                 utoipa::openapi::path::PathItemBuilder::new()
                     .summary(Some(String::from("Web crawler")))
                     .operation(
@@ -233,7 +238,51 @@ async fn main() -> std::io::Result<()> {
                                         mime::APPLICATION_JSON.to_string(),
                                         utoipa::openapi::ContentBuilder::new()
                                             .example(Some(EXAMPLE_SCRAPED_RESULT.to_owned()))
-                                            .schema(Some(CrawledResult::schema()))
+                                            .schema(Some(utoipa::openapi::Ref::from_schema_name(
+                                                "CrawledResult",
+                                            )))
+                                            .build(),
+                                    ),
+                            ),
+                    )
+                    .build(),
+            );
+
+            openapi.paths.paths.insert(
+                String::from("/v1/swap"),
+                utoipa::openapi::path::PathItemBuilder::new()
+                    .summary(Some(String::from("Faceswapper")))
+                    .operation(
+                        utoipa::openapi::HttpMethod::Post,
+                        utoipa::openapi::path::OperationBuilder::new()
+                            .summary(Some(String::from("POST to faceswap")))
+                            .request_body(Some(
+                                utoipa::openapi::request_body::RequestBodyBuilder::new()
+                                    .description(Some(String::from("Body to faceswap")))
+                                    .content(
+                                        mime::APPLICATION_JSON.to_string(),
+                                        utoipa::openapi::content::ContentBuilder::new()
+                                            .schema(Some(utoipa::openapi::Ref::from_schema_name(
+                                                "SwapPostRequest",
+                                            )))
+                                            .example(Some(serde_json::json!({
+                                                "user_img_url": "data:image/jpg;base64,fa",
+                                                "model_img_url": "https://a.com/a.jpg"
+                                            })))
+                                            .build(),
+                                    )
+                                    .build(),
+                            ))
+                            .response(
+                                "200",
+                                utoipa::openapi::response::ResponseBuilder::new()
+                                    .description("Faceswap response")
+                                    .content(
+                                        mime::APPLICATION_JSON.to_string(),
+                                        utoipa::openapi::ContentBuilder::new()
+                                            .schema(Some(utoipa::openapi::Ref::from_schema_name(
+                                                "SwapPostResponse",
+                                            )))
                                             .build(),
                                     ),
                             ),

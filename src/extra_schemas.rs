@@ -100,3 +100,19 @@ lazy_static::lazy_static! {
         "total": 1
     });
 }
+
+#[derive(
+    Default, Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, utoipa::ToSchema,
+)]
+pub struct SwapPostRequest {
+    pub user_img_url: String,
+    pub model_img_url: String,
+}
+
+#[derive(
+    Default, Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, utoipa::ToSchema,
+)]
+pub struct SwapPostResponse {
+    pub output_url: String,
+    pub status: String,
+}
